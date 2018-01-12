@@ -188,7 +188,7 @@ public class MybatisGeneratorBridge{
         PluginConfiguration t4 = new PluginConfiguration();
         t4.setConfigurationType("tech.wetech.admin.generator.plugins.TemplateFilePlugin");
         t4.addProperty("targetProject",generatorConfig.getProjectFolder() + "/" + generatorConfig.getJspTargetFolder());
-        t4.addProperty("targetPackage", "jsp/system");
+        t4.addProperty("targetPackage", "");
         t4.addProperty("templatePath","generator/ftl/jsp.ftl");
         t4.addProperty("jspName",generatorConfig.getJspName());
         t4.addProperty("moduleName",generatorConfig.getModuleName());

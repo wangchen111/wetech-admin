@@ -41,7 +41,7 @@ public class MybatisGeneratorBridgeTest{
         generatorConfig.setControllerPackage("tech.wetech.admin.web.controller.system");
         generatorConfig.setControllerTargetFolder("src/main/java");
         generatorConfig.setJspName("log");
-        generatorConfig.setJspTargetFolder("src/main/webapp/WEB-INF");
+        generatorConfig.setJspTargetFolder("src/main/webapp/WEB-INF/jsp/system");
         generatorConfig.setTableName("sys_log");//表名
         generatorConfig.setDomainObjectName("Log");//实体类名
         generatorConfig.setOffsetLimit(true);//是否分页

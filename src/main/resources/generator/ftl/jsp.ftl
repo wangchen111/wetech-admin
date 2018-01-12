@@ -35,7 +35,7 @@
             <table class="am-table am-table-striped  am-table-hover table-main am-table-bordered" width="100%" id="example_${tableClass.lowerCaseName}">
                 <thead>
                 <tr>
-                    <th><span style="display: none;">ID</span>&nbsp;</th>
+                    <th><#if tableClass.pkFields??><span style="display: none;">${tableClass.pkFields[0].remarks}</span></#if>&nbsp;</th>
                 <#if tableClass.baseFields??>
                 <#list tableClass.baseFields as field>
                     <th>${field.remarks}</th>
@@ -66,8 +66,9 @@
         };
 
         var columns = [
-            {
-                'data': 'id',
+            <#if tableClass.pkFields??>{
+                'data': '${tableClass.pkFields[0].fieldName}',
+            </#if>
                 'width': '2%',
                 'fnCreatedCell': function (nTd, sData, oData, iRow, iCol) {
                     $(nTd).html('');
