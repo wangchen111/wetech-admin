@@ -39,7 +39,7 @@ public class GeneratorConfig {
 
 	private String tableName;
 
-	private String domainObjectName;
+	private String modelName;
 
 	private boolean offsetLimit;
 
@@ -160,12 +160,12 @@ public class GeneratorConfig {
 		this.tableName = tableName;
 	}
 
-	public String getDomainObjectName() {
-		return domainObjectName;
+	public String getModelName() {
+		return modelName;
 	}
 
-	public void setDomainObjectName(String domainObjectName) {
-		this.domainObjectName = domainObjectName;
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
 	}
 
 	public String getProjectFolder() {

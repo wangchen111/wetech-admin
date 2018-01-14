@@ -11,6 +11,7 @@ import org.mybatis.generator.api.ProgressCallback;
 import org.mybatis.generator.api.ShellCallback;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.internal.DefaultShellCallback;
+import org.springframework.stereotype.Component;
 import tech.wetech.admin.generator.model.GeneratorConfig;
 import tech.wetech.admin.generator.plugins.DbRemarksCommentGenerator;
 import tech.wetech.admin.generator.util.JdbcConfigHelper;
@@ -21,6 +22,7 @@ import tech.wetech.admin.generator.util.JdbcConfigHelper;
  * <p>
  * Created by cjbi on 1/5/18.
  */
+@Component
 public class MybatisGeneratorBridge{
 
     private GeneratorConfig generatorConfig;
@@ -47,7 +49,7 @@ public class MybatisGeneratorBridge{
         // Table configuration
         TableConfiguration tableConfig = new TableConfiguration(context);
         tableConfig.setTableName(generatorConfig.getTableName());
-        tableConfig.setDomainObjectName(generatorConfig.getDomainObjectName());
+        tableConfig.setDomainObjectName(generatorConfig.getModelName());
 
         // 针对 postgresql 单独配置
         if (JdbcConfigHelper.getDbType() == JdbcConfigHelper.DbType.PostgreSQL) {
@@ -85,7 +87,7 @@ public class MybatisGeneratorBridge{
         JDBCConnectionConfiguration jdbcConfig = new JDBCConnectionConfiguration();
         jdbcConfig.setDriverClass(JdbcConfigHelper.getDriverClass());
         jdbcConfig.setConnectionURL(JdbcConfigHelper.getURL());
-        jdbcConfig.setUserId(JdbcConfigHelper.getPropUsername());
+        jdbcConfig.setUserId(JdbcConfigHelper.getUsername());
         jdbcConfig.setPassword(JdbcConfigHelper.getPassword());
         // java model
         JavaModelGeneratorConfiguration modelConfig = new JavaModelGeneratorConfiguration();
@@ -165,7 +167,7 @@ public class MybatisGeneratorBridge{
         t2.addProperty("serviceImplName",generatorConfig.getServiceImplName());
         t2.addProperty("serviceName",generatorConfig.getServiceName());
         t2.addProperty("servicePackage",generatorConfig.getServicePackage());
-        t2.addProperty("daoName",StringUtils.isEmpty(generatorConfig.getMapperName())?generatorConfig.getDomainObjectName()+"Mapper": generatorConfig.getMapperName());
+        t2.addProperty("daoName",StringUtils.isEmpty(generatorConfig.getMapperName())?generatorConfig.getModelName()+"Mapper": generatorConfig.getMapperName());
         t2.addProperty("daoPackage",generatorConfig.getDaoPackage());
         t2.addProperty("fileName","${serviceImplName}.java");
         context.addPluginConfiguration(t2);

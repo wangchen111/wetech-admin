@@ -90,7 +90,7 @@
 
 <script src="<%=request.getContextPath()%>/static/js/amazeui.datatables.js"></script>
 <script src="<%=request.getContextPath()%>/static/js/amazeui.datatables.buttons.js"></script>
-<script src="<%=request.getContextPath()%>/static/js/common/public.js"></script>
+<script src="<%=request.getContextPath()%>/static/js/common/utils.js"></script>
 <script src="<%=request.getContextPath()%>/static/js/admin.js"></script>
 </body>
 </html>
