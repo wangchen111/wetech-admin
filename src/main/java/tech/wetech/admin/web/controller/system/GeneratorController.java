@@ -40,7 +40,6 @@ import tech.wetech.admin.generator.model.GeneratorConfig;
 import tech.wetech.admin.generator.util.JdbcConfigHelper;
 import tech.wetech.admin.model.system.User;
 import tech.wetech.admin.web.controller.base.BaseController;
-import tech.wetech.admin.web.dto.JsonResult;
 import tech.wetech.admin.web.dto.system.GeneratorDto;
 
 /**
