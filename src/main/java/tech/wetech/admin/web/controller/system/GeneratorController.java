@@ -92,10 +92,11 @@ public class GeneratorController extends BaseController{
         } catch (Exception e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             try {
-                byte[] bytes = String.format("生成代码失败，错误原因：%s", e.getMessage()).getBytes("UTF-8");
+                String errMsg = String.format("生成代码失败，错误原因：%s", e.getMessage());
                 response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
                 OutputStream out = response.getOutputStream();
-                out.write(bytes);
+                logger.error(errMsg);
+                out.write(errMsg.getBytes("UTF-8"));
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
@@ -126,7 +127,7 @@ public class GeneratorController extends BaseController{
             if (builder.length() > 0) {
                 builder.deleteCharAt(builder.length() - 1);
             }
-            logger.error(builder.toString());
+            logger.error(String.format("参数校验失败:%s"),builder.toString());
             throw new RuntimeException(builder.toString());
         }
         BeanUtils.copyProperties(generatorDto, generatorConfig);
