@@ -14,11 +14,6 @@ import java.util.List;
  */
 public class GeneratorConfig {
 
-	/**
-	 * 本配置的名称
-	 */
-	private String name;
-
 	private String projectFolder;
 
 	private String moduleName;
@@ -142,14 +137,6 @@ public class GeneratorConfig {
 
 	public void setJspName(String jspName) {
 		this.jspName = jspName;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getTableName() {

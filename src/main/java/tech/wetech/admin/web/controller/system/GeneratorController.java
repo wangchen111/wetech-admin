@@ -1,14 +1,25 @@
 package tech.wetech.admin.web.controller.system;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,17 +27,20 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import tech.wetech.admin.common.utils.Constants;
+import tech.wetech.admin.common.utils.JsonUtil;
 import tech.wetech.admin.common.utils.ZipUtils;
 import tech.wetech.admin.generator.bridge.MybatisGeneratorBridge;
 import tech.wetech.admin.generator.model.GeneratorConfig;
 import tech.wetech.admin.generator.util.JdbcConfigHelper;
-import tech.wetech.admin.model.system.BizException;
 import tech.wetech.admin.model.system.User;
 import tech.wetech.admin.web.controller.base.BaseController;
+import tech.wetech.admin.web.dto.JsonResult;
 import tech.wetech.admin.web.dto.system.GeneratorDto;
 
 /**
@@ -47,17 +61,28 @@ public class GeneratorController extends BaseController{
         return "system/generator";
     }
 
+    private String base64DecodeToString(String text) throws UnsupportedEncodingException {
+        byte[] textByte = text.getBytes("UTF-8");
+        Base64.Decoder decoder = Base64.getDecoder();
+        decoder.decode(textByte);
+        return new String(decoder.decode(textByte), "UTF-8");
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/code.zip")
-    public ResponseEntity<byte[]> downloadCode(HttpServletRequest request) {
+    public ResponseEntity<byte[]> downloadCode(HttpServletRequest request, HttpServletResponse response, String p) {
         ResponseEntity<byte[]> responseEntity = null;
         String tmpPath = request.getSession().getServletContext().getRealPath("/WEB-INF/tmp");
         User user = (User) request.getAttribute(Constants.CURRENT_USER);
         String srcPath = tmpPath + File.separator + user.getUsername() + File.separator + "code";
         String destPath = tmpPath + File.separator + user.getUsername() + File.separator + "code" + ZipUtils.EXT;
         try {
-            GeneratorDto generatorDto = new GeneratorDto();
-            generatorDto.setProjectFolder(srcPath);
-            mybatisGeneratorBridge.setGeneratorConfig(getConfig(generatorDto));
+            if (StringUtils.isEmpty(p)) {
+                throw new RuntimeException("参数p不能为空");
+            }
+            String json = base64DecodeToString(p);
+            GeneratorDto dto = (GeneratorDto) JsonUtil.getInstance().json2obj(json, GeneratorDto.class);
+            dto.setProjectFolder(srcPath);
+            mybatisGeneratorBridge.setGeneratorConfig(getConfig(dto));
             mybatisGeneratorBridge.generate();
             ZipUtils.compress(srcPath, destPath);
             File file = new File(destPath);
@@ -66,7 +91,15 @@ public class GeneratorController extends BaseController{
             headers.setContentDispositionFormData("attachment", file.getName());
             responseEntity = new ResponseEntity<>(FileUtils.readFileToByteArray(file), headers, HttpStatus.CREATED);
         } catch (Exception e) {
-            new BizException("生成代码失败", e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            try {
+                byte[] bytes = String.format("生成代码失败，错误原因：%s", e.getMessage()).getBytes("UTF-8");
+                response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+                OutputStream out = response.getOutputStream();
+                out.write(bytes);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         } finally {
             File file = new File(tmpPath + File.separator + user.getUsername());
@@ -77,38 +110,27 @@ public class GeneratorController extends BaseController{
         return responseEntity;
     }
 
-    private GeneratorConfig getConfig(GeneratorDto generatorDto) {
-
+    private GeneratorConfig getConfig(GeneratorDto generatorDto) throws RuntimeException {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         GeneratorConfig generatorConfig = new GeneratorConfig();
-        generatorConfig.setProjectFolder(generatorDto.getProjectFolder());// 项目目录
-        generatorConfig.setModuleName("system");
-        generatorConfig.setModelPackage("tech.wetech.admin.model");// 实体类包名
-        generatorConfig.setModelPackageTargetFolder("src/main/java");// 实体类存放目录
-        generatorConfig.setDaoPackage("tech.wetech.admin.mapper");// dao接口包名
-        generatorConfig.setDaoTargetFolder("src/main/java");// dao存放目录
-        generatorConfig.setMapperName("");// 自定义接口名称(选填)
-        generatorConfig.setMappingXMLPackage("mybatis.system");// 映射xml文件包名
-        generatorConfig.setMappingXMLTargetFolder("src/main/resource");// 映射xml文件存放目录
-        generatorConfig.setServiceName("LogService");
-        generatorConfig.setServicePackage("tech.wetech.admin.service.system");
-        generatorConfig.setServiceTargetFolder("src/main/java");
-        generatorConfig.setServiceImplName("LogServiceImpl");
-        generatorConfig.setServiceImplPackage("tech.wetech.admin.service.system.impl");
-        generatorConfig.setServiceImplTargetFolder("src/main/java");
-        generatorConfig.setControllerName("LogController");
-        generatorConfig.setControllerPackage("tech.wetech.admin.web.controller.system");
-        generatorConfig.setControllerTargetFolder("src/main/java");
-        generatorConfig.setJspName("log");
-        generatorConfig.setJspTargetFolder("src/main/webapp/WEB-INF/jsp/system");
-        generatorConfig.setTableName("sys_log");// 表名
-        generatorConfig.setModelName("Log");// 实体类名
-        generatorConfig.setOffsetLimit(true);// 是否分页
-        generatorConfig.setComment(true);// 是否生成实体域注释(来自表注释)
-        generatorConfig.setNeedToStringHashcodeEquals(true);// 是否生成toString/hashCode/equals方法
-        generatorConfig.setAnnotation(false);// 是否生成JPA注解
-        generatorConfig.setUseActualColumnNames(false);// 是否使用实际的列名
-        generatorConfig.setGenerateKeys("");//
-        generatorConfig.setUseTableNameAlias(false);// 是否xml中生成表的表面
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<GeneratorDto>> violations = validator.validate(generatorDto);
+        if (!CollectionUtils.isEmpty(violations)) {
+            StringBuilder builder = new StringBuilder();
+            violations.forEach(violation -> {
+                String property = violation.getPropertyPath().toString();
+                String message = violation.getMessage();
+                builder.append(property);
+                builder.append(message);
+                builder.append(",");
+            });
+            if (builder.length() > 0) {
+                builder.deleteCharAt(builder.length() - 1);
+            }
+            logger.error(builder.toString());
+            throw new RuntimeException(builder.toString());
+        }
+        BeanUtils.copyProperties(generatorDto, generatorConfig);
         if (!checkDirs(generatorConfig)) {
             return null;
         }

@@ -3,39 +3,45 @@ package tech.wetech.admin.web.dto.system;
 import org.mybatis.generator.config.ColumnOverride;
 import org.mybatis.generator.config.IgnoredColumn;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
+ * 生成器传输类
+ * <p>
  * Created by cjbi on 2018/1/14.
  */
-public class GeneratorDto {
+public class GeneratorDto{
 
-    /**
-     * 本配置的名称
-     */
-    private String name;
-
+    @NotNull
     private String projectFolder;
 
+    @NotNull
     private String moduleName;
 
+    @NotNull
     private String modelPackage;
 
-    private String modelPackageTargetFolder;
+    private String modelPackageTargetFolder = "src/main/java";
 
+    @NotNull
     private String daoPackage;
 
-    private String daoTargetFolder;
+    private String daoTargetFolder = "src/main/java";
 
     private String mapperName;
 
+    @NotNull
     private String mappingXMLPackage;
 
+    @NotNull
     private String mappingXMLTargetFolder;
 
+    @NotNull
     private String tableName;
 
-    private String domainObjectName;
+    @NotNull
+    private String modelName;
 
     private boolean offsetLimit;
 
@@ -51,27 +57,33 @@ public class GeneratorDto {
 
     private boolean useTableNameAlias;
 
-    //custom config by cjbi
+    @NotNull
     private String serviceImplName;
 
+    @NotNull
     private String serviceImplPackage;
 
-    private String serviceImplTargetFolder;
+    private String serviceImplTargetFolder = "src/main/java";
 
+    @NotNull
     private String serviceName;
 
+    @NotNull
     private String servicePackage;
 
-    private String serviceTargetFolder;
+    private String serviceTargetFolder = "src/main/java";
 
+    @NotNull
     private String controllerName;
 
+    @NotNull
     private String controllerPackage;
 
-    private String controllerTargetFolder;
+    private String controllerTargetFolder = "src/main/java";
 
     private String jspName;
 
+    @NotNull
     private String jspTargetFolder;
 
     /**
@@ -140,14 +152,6 @@ public class GeneratorDto {
         this.jspName = jspName;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getTableName() {
         return tableName;
     }
@@ -156,12 +160,12 @@ public class GeneratorDto {
         this.tableName = tableName;
     }
 
-    public String getDomainObjectName() {
-        return domainObjectName;
+    public String getModelName() {
+        return modelName;
     }
 
-    public void setDomainObjectName(String domainObjectName) {
-        this.domainObjectName = domainObjectName;
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
     }
 
     public String getProjectFolder() {
@@ -309,7 +313,7 @@ public class GeneratorDto {
     }
 
     public void setJspTargetFolder(String jspTargetFolder) {
-        this.jspTargetFolder = jspTargetFolder;
+        this.jspTargetFolder = "src/main/webapp/WEB-INF/jsp/" + jspTargetFolder;
     }
 
     public String getServiceImplName() {

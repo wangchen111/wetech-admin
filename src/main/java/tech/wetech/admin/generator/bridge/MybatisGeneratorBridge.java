@@ -11,6 +11,8 @@ import org.mybatis.generator.api.ProgressCallback;
 import org.mybatis.generator.api.ShellCallback;
 import org.mybatis.generator.config.*;
 import org.mybatis.generator.internal.DefaultShellCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import tech.wetech.admin.generator.model.GeneratorConfig;
 import tech.wetech.admin.generator.plugins.DbRemarksCommentGenerator;
@@ -24,6 +26,8 @@ import tech.wetech.admin.generator.util.JdbcConfigHelper;
  */
 @Component
 public class MybatisGeneratorBridge{
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisGeneratorBridge.class);
 
     private GeneratorConfig generatorConfig;
 
@@ -148,7 +152,18 @@ public class MybatisGeneratorBridge{
         }
 
         //文件模板插件配置
+        if(StringUtils.isEmpty(generatorConfig.getServiceName())) {
+            generatorConfig.setServiceName(generatorConfig.getModelName() + "Service");
+        }
+        if(StringUtils.isEmpty(generatorConfig.getServiceImplName())) {
+            generatorConfig.setServiceImplName(generatorConfig.getModelName() + "ServiceImpl");
+        }
+        if(StringUtils.isEmpty(generatorConfig.getControllerName())) {
+            generatorConfig.setControllerName(generatorConfig.getModelName() + "Controller");
+        }
+
         //Service interface
+        LOGGER.info("config servie interface plugin");
         PluginConfiguration t1 = new PluginConfiguration();
         t1.setConfigurationType("tech.wetech.admin.generator.plugins.TemplateFilePlugin");
         t1.addProperty("targetProject",generatorConfig.getProjectFolder() + "/" + generatorConfig.getServiceTargetFolder());
@@ -159,13 +174,14 @@ public class MybatisGeneratorBridge{
         context.addPluginConfiguration(t1);
 
         //service impl
+        LOGGER.info("config serviceImpl plugin");
         PluginConfiguration t2 = new PluginConfiguration();
         t2.setConfigurationType("tech.wetech.admin.generator.plugins.TemplateFilePlugin");
         t2.addProperty("targetProject", generatorConfig.getProjectFolder() + "/" + generatorConfig.getServiceImplTargetFolder());
         t2.addProperty("targetPackage",generatorConfig.getServiceImplPackage());
         t2.addProperty("templatePath","generator/ftl/serviceImpl.ftl");
-        t2.addProperty("serviceImplName",generatorConfig.getServiceImplName());
-        t2.addProperty("serviceName",generatorConfig.getServiceName());
+        t2.addProperty("serviceImplName", generatorConfig.getServiceImplName());
+        t2.addProperty("serviceName", generatorConfig.getServiceName());
         t2.addProperty("servicePackage",generatorConfig.getServicePackage());
         t2.addProperty("daoName",StringUtils.isEmpty(generatorConfig.getMapperName())?generatorConfig.getModelName()+"Mapper": generatorConfig.getMapperName());
         t2.addProperty("daoPackage",generatorConfig.getDaoPackage());
@@ -173,26 +189,32 @@ public class MybatisGeneratorBridge{
         context.addPluginConfiguration(t2);
 
         //controller
+        LOGGER.info("config controller plugin");
         PluginConfiguration t3 = new PluginConfiguration();
         t3.setConfigurationType("tech.wetech.admin.generator.plugins.TemplateFilePlugin");
         t3.addProperty("targetProject",generatorConfig.getProjectFolder() + "/" + generatorConfig.getControllerTargetFolder());
         t3.addProperty("targetPackage", generatorConfig.getControllerPackage());
         t3.addProperty("templatePath","generator/ftl/controller.ftl");
-        t3.addProperty("serviceName",generatorConfig.getServiceName());
+        t3.addProperty("serviceName", generatorConfig.getServiceName());
         t3.addProperty("servicePackage",generatorConfig.getServicePackage());
-        t3.addProperty("controllerName",generatorConfig.getControllerName());
+        t3.addProperty("controllerName", generatorConfig.getControllerName());
         t3.addProperty("controllerPackage",generatorConfig.getControllerPackage());
         t3.addProperty("moduleName",generatorConfig.getModuleName());
         t3.addProperty("fileName","${controllerName}.java");
         context.addPluginConfiguration(t3);
 
         //jsp
+        LOGGER.info("config jsp plugin");
         PluginConfiguration t4 = new PluginConfiguration();
+        String jspName = generatorConfig.getJspName();
+        if(StringUtils.isEmpty(jspName)) {
+            jspName = generatorConfig.getModelName();
+        }
         t4.setConfigurationType("tech.wetech.admin.generator.plugins.TemplateFilePlugin");
         t4.addProperty("targetProject",generatorConfig.getProjectFolder() + "/" + generatorConfig.getJspTargetFolder());
         t4.addProperty("targetPackage", "");
         t4.addProperty("templatePath","generator/ftl/jsp.ftl");
-        t4.addProperty("jspName",generatorConfig.getJspName());
+        t4.addProperty("jspName",jspName);
         t4.addProperty("moduleName",generatorConfig.getModuleName());
         t4.addProperty("fileName", "${jspName}.jsp");
         context.addPluginConfiguration(t4);
