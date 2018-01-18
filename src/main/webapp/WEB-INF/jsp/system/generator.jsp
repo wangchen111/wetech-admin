@@ -50,7 +50,7 @@
                             <div class="am-input-group">
                                 <input type="text" class="am-form-field" name="modelName" placeholder="Person" required>
                                 <span class="am-input-group-btn">
-                                    <button class="am-btn am-btn-primary am-btn-hollow" type="button">定制列</button>
+                                    <button class="am-btn am-btn-primary am-btn-hollow" id="columnCustom" type="button">定制列</button>
                                   </span>
                             </div>
                         </div>
@@ -129,7 +129,7 @@
                         <%----%>
                         <div class="am-u-md-end am-text-right am-padding">
                             <button type="text" id="submit" class="am-btn am-btn-primary am-radius">代码生成</button>
-                            <%--<button type="reset" class="am-btn am-btn-warning am-radius">保存配置</button>--%>
+                            <button type="text" id="saveConfig" class="am-btn am-btn-warning am-radius">保存配置</button>
                         </div>
                     </form>
 
@@ -147,6 +147,7 @@
     <%-- Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience. For more help, check https://xhr.spec.whatwg.org/.  --%>
     $.getScript("<%=request.getContextPath()%>/static/js/common/base64.js");
     $(function () {
+        init();
         //左侧表格点击事件
         $('#tableNames').find('a').on('click', function (e) {
             var $form = $('#generator-form');
@@ -160,16 +161,26 @@
             $form.find('input[name="modelName"]').val(modelName);
         });
 
+        function init() {
+            var $form = $('#generator-form');
+            var json = localStorage.getItem("generatorConfig");
+            var config = JSON.parse(json);
+            debugger;
+            for(var key in config) {
+                $form.find('input[name="'+key+'"]').val(config[key]);
+            }
+        }
+
         function generatorConfig($form) {
             var config = {};
             $form.serializeArray().forEach(function (currentValue, index, array) {
                 var key = currentValue.name;
                 var value = currentValue.value;
                 switch (value) {
-                    case "on" :
+                    case 'on' :
                         value = true;
                         break;
-                    case "off":
+                    case 'off' :
                         value = false;
                         break;
                 }
@@ -179,6 +190,20 @@
             return config;
         }
 
+        $('#columnCustom').on('click', function(e) {
+            $.mydialog.msg('功能完善中。。。', $.mydialog.dialog_type.msg.warn);
+        });
+
+        //保存配置到 Local Storage
+        $('#saveConfig').on('click', function(e) {
+            $.mydialog.confirm('当前操作会覆盖以前的配置，是否继续？',{icon: 3,title: '系统提示',}, function(index){
+                var $form = $('#generator-form');
+                var json = JSON.stringify(generatorConfig($form));
+                localStorage.setItem('generatorConfig',json);
+                $.mydialog.msg('保存成功', $.mydialog.dialog_type.msg.info);
+                $.mydialog.closeDialog(index);
+            });
+        });
 
         //点击代码生成事件
         $('#submit').on('click', function (e) {
