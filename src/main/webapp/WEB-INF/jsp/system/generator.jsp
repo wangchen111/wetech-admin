@@ -186,7 +186,6 @@
                 }
                 eval('config.' + key + '=value;');
             });
-            console.log(config);
             return config;
         }
 
@@ -209,13 +208,11 @@
         $('#submit').on('click', function (e) {
             var $form = $('#generator-form');
             if ($form.isFormValid()) {
-                debugger;
                 var json = JSON.stringify(generatorConfig($form));
                 var base64 = base64encode(json);
                 var url = basePath + '/generator/code.zip?p=' + base64;
                 window.open(url);
             }
-            debugger;
         });
 
     });
